@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # -----------------------------------------
-      # STEP 0: Checkout
+      # STEP 0: Checkout repository
       # -----------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # -----------------------------------------
-      # STEP 3: Upload platform installers
+      # STEP 3: Upload installers to Release
       # -----------------------------------------
       - name: Upload installers
         uses: softprops/action-gh-release@v1
@@ -62,7 +62,6 @@ jobs:
       # STEP 4: Generate version.json (固定 URL)
       # -----------------------------------------
       - name: Generate version.json
-        id: gen_version
         run: |
           TAG=${GITHUB_REF##*/}
           PUBLISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -71,7 +70,6 @@ jobs:
           WINDOWS_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/Kolayaz-windows.exe"
           LINUX_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/Kolayaz-linux.AppImage"
 
-          # 生成 version.json 并写入仓库根目录
           echo "{
             \"version\":\"${TAG}\",
             \"urls\":{
@@ -86,7 +84,7 @@ jobs:
           cat version.json
 
       # -----------------------------------------
-      # STEP 5: Commit & push version.json 到 main
+      # STEP 5: Commit & push version.json back to main
       # -----------------------------------------
       - name: Commit version.json to main
         uses: EndBug/add-and-commit@v9
