@@ -11,23 +11,31 @@ permissions:
 env:
   OWNER: "sulaymanyf"
   REPO: "kolayaz_client"
+  BRANCH: "main"  # 你的主分支
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout 代码
-      - name: Checkout
+      # -----------------------------------------
+      # STEP 0: Checkout 主分支和 tag
+      # -----------------------------------------
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.BRANCH }}
           fetch-depth: 0
 
-      # 2. 确认 dist/ 下有安装包
+      # -----------------------------------------
+      # STEP 1: 验证 dist 文件夹
+      # -----------------------------------------
       - name: Verify dist folder
         run: |
           ls -la dist || { echo "dist folder missing!"; exit 1; }
 
-      # 3. 创建 GitHub Release
+      # -----------------------------------------
+      # STEP 2: 创建 GitHub Release
+      # -----------------------------------------
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -38,7 +46,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 4. 上传安装包
+      # -----------------------------------------
+      # STEP 3: 上传 3 平台安装包
+      # -----------------------------------------
       - name: Upload installers
         uses: softprops/action-gh-release@v1
         with:
@@ -50,26 +60,36 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 5. 生成 version.json
+      # -----------------------------------------
+      # STEP 4: 生成固定地址 version.json
+      # -----------------------------------------
       - name: Generate version.json
+        id: gen_version
         run: |
           TAG=${GITHUB_REF##*/}
           PUBLISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          
+
+          DARWIN_URL="https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/dist/Kolayaz-darwin.dmg"
+          WINDOWS_URL="https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/dist/Kolayaz-windows.exe"
+          LINUX_URL="https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/dist/Kolayaz-linux.AppImage"
+
           echo "{
             \"version\":\"${TAG}\",
             \"urls\":{
-              \"darwin\":\"https://raw.githubusercontent.com/${OWNER}/${REPO}/main/dist/Kolayaz-darwin.dmg\",
-              \"windows\":\"https://raw.githubusercontent.com/${OWNER}/${REPO}/main/dist/Kolayaz-windows.exe\",
-              \"linux\":\"https://raw.githubusercontent.com/${OWNER}/${REPO}/main/dist/Kolayaz-linux.AppImage\"
+              \"darwin\":\"${DARWIN_URL}\",
+              \"windows\":\"${WINDOWS_URL}\",
+              \"linux\":\"${LINUX_URL}\"
             },
             \"published_at\":\"${PUBLISHED_AT}\"
           }" > version.json
 
+          echo "Generated version.json:"
           cat version.json
 
-      # 6. 上传 version.json 到 release
-      - name: Upload version.json
+      # -----------------------------------------
+      # STEP 5: 上传 version.json 到 Release
+      # -----------------------------------------
+      - name: Upload version.json to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
@@ -77,11 +97,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 7. 提交 version.json 回 main 分支
+      # -----------------------------------------
+      # STEP 6: Commit version.json 回 main 分支
+      # -----------------------------------------
       - name: Commit version.json to main
         uses: EndBug/add-and-commit@v9
         with:
           add: "version.json"
           message: "chore: update version.json for ${{ github.ref_name }}"
+          push: "origin ${{ env.BRANCH }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
