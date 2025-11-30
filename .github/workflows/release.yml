@@ -16,20 +16,23 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      # -----------------------------------------
+      # STEP 0: Checkout
+      # -----------------------------------------
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # -----------------------------------------
-      # STEP 1: 使用 dist/ 下你放好的安装文件
+      # STEP 1: Verify dist folder
       # -----------------------------------------
       - name: Verify dist folder
         run: |
           ls -la dist || { echo "dist folder missing!"; exit 1; }
 
       # -----------------------------------------
-      # STEP 2: 创建 GitHub Release
+      # STEP 2: Create GitHub Release
       # -----------------------------------------
       - name: Create Release
         id: create_release
@@ -42,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # -----------------------------------------
-      # STEP 3: 上传 3 平台安装包
+      # STEP 3: Upload platform installers
       # -----------------------------------------
       - name: Upload installers
         uses: softprops/action-gh-release@v1
@@ -56,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # -----------------------------------------
-      # STEP 4: 自动生成 version.json
+      # STEP 4: Generate version.json (固定 URL)
       # -----------------------------------------
       - name: Generate version.json
         id: gen_version
@@ -68,6 +71,7 @@ jobs:
           WINDOWS_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/Kolayaz-windows.exe"
           LINUX_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/Kolayaz-linux.AppImage"
 
+          # 生成 version.json 并写入仓库根目录
           echo "{
             \"version\":\"${TAG}\",
             \"urls\":{
@@ -82,20 +86,9 @@ jobs:
           cat version.json
 
       # -----------------------------------------
-      # STEP 5: 上传 version.json 到 Release
+      # STEP 5: Commit & push version.json 到 main
       # -----------------------------------------
-      - name: Upload version.json to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: version.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # -----------------------------------------
-      # STEP 6: Commit version.json back to main
-      # -----------------------------------------
-      - name: Commit version.json to repo
+      - name: Commit version.json to main
         uses: EndBug/add-and-commit@v9
         with:
           add: "version.json"
