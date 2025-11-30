@@ -4,26 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kolayaz 客户端下载</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        h1 { margin-bottom: 30px; }
-        a { display: block; margin: 10px; font-size: 18px; text-decoration: none; color: white; background: #0078d7; padding: 10px 20px; border-radius: 5px; }
-        a:hover { background: #005fa3; }
+        body {
+            background: #f5f6fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin-top: 80px;
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+        .version {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        .btn-download {
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
-<h1>Kolayaz 客户端下载</h1>
-<a id="darwin" href="#">macOS 下载</a>
-<a id="windows" href="#">Windows 下载</a>
-<a id="linux" href="#">Linux 下载</a>
-</body>
+<div class="container">
+    <h1>Kolayaz 客户端下载</h1>
+    <div class="version" id="version">加载最新版本中...</div>
+
+    <a href="#" id="btn-mac" class="btn btn-primary btn-download">下载 macOS</a>
+    <a href="#" id="btn-win" class="btn btn-success btn-download">下载 Windows</a>
+    <a href="#" id="btn-linux" class="btn btn-warning btn-download">下载 Linux</a>
+</div>
+
+<footer>© 2025 Kolayaz</footer>
+
 <script>
-    fetch('https://raw.githubusercontent.com/sulaymanyf/kolayaz_client/main/version.json')
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('darwin').href = data.urls.darwin;
-            document.getElementById('windows').href = data.urls.windows;
-            document.getElementById('linux').href = data.urls.linux;
-        });
+    async function loadLatestVersion() {
+        try {
+            const res = await fetch('https://raw.githubusercontent.com/sulaymanyf/kolayaz_client/main/version.json', {cache: "no-store"});
+            const data = await res.json();
+
+            document.getElementById('version').textContent = `最新版本: ${data.version}`;
+
+            document.getElementById('btn-mac').href = data.urls.darwin;
+            document.getElementById('btn-win').href = data.urls.windows;
+            document.getElementById('btn-linux').href = data.urls.linux;
+        } catch (err) {
+            console.error('加载最新版本失败', err);
+            document.getElementById('version').textContent = '无法获取最新版本';
+        }
+    }
+
+    loadLatestVersion();
 </script>
+</body>
 </html>
