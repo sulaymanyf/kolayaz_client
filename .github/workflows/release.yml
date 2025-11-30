@@ -79,14 +79,9 @@ jobs:
 
       # 7. 提交 version.json 回 main 分支
       - name: Commit version.json to main
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git checkout main
-          mv version.json version.json.tmp
-          git add version.json.tmp
-          git commit -m "chore: update version.json for ${{ github.ref_name }}" || echo "No changes to commit"
-          git mv version.json.tmp version.json
-          git push origin main
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "version.json"
+          message: "chore: update version.json for ${{ github.ref_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
