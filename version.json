@@ -1,4 +1,9 @@
 {
-  "version": "1.0.2",
-  "url": "https://yourdomain.com/downloads/app-1.0.2.exe"
+  "version":"v1.0.2",
+  "urls":{
+    "darwin":"https://github.com/sulaymanyf/kolayaz_client/releases/download/v1.0.3/Kolayaz-darwin.dmg",
+    "windows":"https://github.com/sulaymanyf/kolayaz_client/releases/download/v1.0.3/Kolayaz-windows.exe",
+    "linux":"https://github.com/sulaymanyf/kolayaz_client/releases/download/v1.0.3/Kolayaz-linux.AppImage"
+  },
+  "published_at":"2025-11-30T18:49:40Z"
 }
