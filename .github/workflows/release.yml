@@ -16,24 +16,18 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      # -----------------------------------------
-      # STEP 0: Checkout repository
-      # -----------------------------------------
-      - name: Checkout repository
+      # 1. Checkout 代码
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # -----------------------------------------
-      # STEP 1: Verify dist folder
-      # -----------------------------------------
+      # 2. 确认 dist/ 下有安装包
       - name: Verify dist folder
         run: |
           ls -la dist || { echo "dist folder missing!"; exit 1; }
 
-      # -----------------------------------------
-      # STEP 2: Create GitHub Release
-      # -----------------------------------------
+      # 3. 创建 GitHub Release
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -44,9 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # -----------------------------------------
-      # STEP 3: Upload installers to Release
-      # -----------------------------------------
+      # 4. 上传安装包
       - name: Upload installers
         uses: softprops/action-gh-release@v1
         with:
@@ -58,38 +50,43 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # -----------------------------------------
-      # STEP 4: Generate version.json (固定 URL)
-      # -----------------------------------------
+      # 5. 生成 version.json
       - name: Generate version.json
         run: |
           TAG=${GITHUB_REF##*/}
           PUBLISHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          DARWIN_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/Kolayaz-darwin.dmg"
-          WINDOWS_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/Kolayaz-windows.exe"
-          LINUX_URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/Kolayaz-linux.AppImage"
-
+          
           echo "{
             \"version\":\"${TAG}\",
             \"urls\":{
-              \"darwin\":\"${DARWIN_URL}\",
-              \"windows\":\"${WINDOWS_URL}\",
-              \"linux\":\"${LINUX_URL}\"
+              \"darwin\":\"https://raw.githubusercontent.com/${OWNER}/${REPO}/main/dist/Kolayaz-darwin.dmg\",
+              \"windows\":\"https://raw.githubusercontent.com/${OWNER}/${REPO}/main/dist/Kolayaz-windows.exe\",
+              \"linux\":\"https://raw.githubusercontent.com/${OWNER}/${REPO}/main/dist/Kolayaz-linux.AppImage\"
             },
             \"published_at\":\"${PUBLISHED_AT}\"
           }" > version.json
 
-          echo "Generated version.json:"
           cat version.json
 
-      # -----------------------------------------
-      # STEP 5: Commit & push version.json back to main
-      # -----------------------------------------
-      - name: Commit version.json to main
-        uses: EndBug/add-and-commit@v9
+      # 6. 上传 version.json 到 release
+      - name: Upload version.json
+        uses: softprops/action-gh-release@v1
         with:
-          add: "version.json"
-          message: "chore: update version.json for ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          files: version.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 7. 提交 version.json 回 main 分支
+      - name: Commit version.json to main
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout main
+          mv version.json version.json.tmp
+          git add version.json.tmp
+          git commit -m "chore: update version.json for ${{ github.ref_name }}" || echo "No changes to commit"
+          git mv version.json.tmp version.json
+          git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
