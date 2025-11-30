@@ -1,9 +1,0 @@
-{
-  "version":"v1.0.6",
-  "urls":{
-    "darwin":"https://raw.githubusercontent.com/sulaymanyf/kolayaz_client/main/dist/Kolayaz-darwin.dmg",
-    "windows":"https://raw.githubusercontent.com/sulaymanyf/kolayaz_client/main/dist/Kolayaz-windows.exe",
-    "linux":"https://raw.githubusercontent.com/sulaymanyf/kolayaz_client/main/dist/Kolayaz-linux.AppImage"
-  },
-  "published_at":"2025-11-30T19:42:31Z"
-}
