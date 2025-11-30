@@ -13,8 +13,17 @@
 </head>
 <body>
 <h1>Kolayaz 客户端下载</h1>
-<a href="https://github.com/sulaymanyf/kolayaz_client/releases/download/v1.0.8/Kolayaz-darwin.dmg">macOS 下载</a>
-<a href="https://github.com/sulaymanyf/kolayaz_client/releases/download/v1.0.8/Kolayaz-windows.exe">Windows 下载</a>
-<a href="https://github.com/sulaymanyf/kolayaz_client/releases/download/v1.0.8/Kolayaz-linux.AppImage">Linux 下载</a>
+<a id="darwin" href="#">macOS 下载</a>
+<a id="windows" href="#">Windows 下载</a>
+<a id="linux" href="#">Linux 下载</a>
 </body>
+<script>
+    fetch('https://raw.githubusercontent.com/sulaymanyf/kolayaz_client/main/version.json')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('darwin').href = data.urls.darwin;
+            document.getElementById('windows').href = data.urls.windows;
+            document.getElementById('linux').href = data.urls.linux;
+        });
+</script>
 </html>
